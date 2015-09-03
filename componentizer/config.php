@@ -23,6 +23,9 @@ $top_components = [4,5];
 // Array of post IDs that should appear below the reorderable section in the Component Order metabox
 $bottom_components = [16];
 
+// Fields that aren't from ACF but should still be included
+$persistant_fields = ['content'];
+
 // Array of post types that should not have the Component Order metabox
 $exclude_order_for_post_types = ['nav_menu_item', 'revision', 'attachment'];
 
@@ -44,7 +47,7 @@ foreach ($component_fields as $component => $component_field) {
 		}
 	}
 }
-$fields_components = array_merge($fields_components,$additional_fields);
+$fields_components = array_merge($fields_component);
 
 // Set the above configuration options to an associative array for easy retrieval later
 $options = [
@@ -52,6 +55,7 @@ $options = [
 	'bottom_components' => $bottom_components, // Array of post IDs that should appear below the reorderable section in the Field Order metabox
 	'exclude_order_for_post_types' => $exclude_order_for_post_types, // Array of post types that should not have the Field Order metabox
 	'component_fields' => $fields_components,
+	'persistant_fields' => $persistant_fields,
 ];
 /**
  * Returns either the requested option or an array of all of the options
