@@ -2,6 +2,9 @@
 
 namespace Components\Admin;
 
+// Don't bother on the front end;
+if (!is_admin()) return;
+
 use Components\Config as Config;
 
 class Admin {
@@ -10,16 +13,14 @@ class Admin {
 
   function __construct() {
     $this->options = Config\get_options();
-    if (is_admin()) {
-      add_action( 'admin_enqueue_scripts', array($this,'enqueue_scripts') );
-      add_action( 'admin_init', array($this,'check_for_acf') );
-      add_action( 'admin_menu', array($this,'add_theme_page') );
-      $post_types = get_post_types();
-      $post_types = array_diff($post_types, $this->options['exclude_order_for_post_types']);
-      foreach ($post_types as $post_type) {
-        add_action( 'add_meta_boxes_'.$post_type, array($this,'add_component_order_box') );
-        add_action( 'save_post', array($this,'component_order_save_meta_box_data') );
-      }
+    add_action( 'admin_enqueue_scripts', array($this,'enqueue_scripts') );
+    add_action( 'admin_init', array($this,'check_for_acf') );
+    add_action( 'admin_menu', array($this,'add_theme_page') );
+    $post_types = get_post_types();
+    $post_types = array_diff($post_types, $this->options['exclude_order_for_post_types']);
+    foreach ($post_types as $post_type) {
+      add_action( 'add_meta_boxes_'.$post_type, array($this,'add_component_order_box') );
+      add_action( 'save_post', array($this,'component_order_save_meta_box_data') );
     }
   }
 
@@ -198,9 +199,15 @@ class Admin {
       }
     }
 
+
+    $filter = array( 'post_id' => get_the_ID() );
+    $metabox_ids = array();
+    $metabox_ids = apply_filters( 'acf/location/match_field_groups', $metabox_ids, $filter );
+    // var_dump($metabox_ids);
+
     $field_groups = apply_filters('acf/get_field_groups', array());
     foreach ($field_groups as $field_group) {
-      if (!in_array($field_group['id'], $field_ids)) {
+      if (in_array($field_group['id'], $metabox_ids)) {
         $field_args = [
             'id' => $field_group['id'],
             'name' => $field_group['title'],
