@@ -40,56 +40,56 @@ function build($components = null, $suffixes = null) {
 function get_suffixes($last_suffix = false) {
   $suffixes = ['index'];
   if (is_home()) {
-    array_push($suffixes,'home');
+    array_unshift($suffixes,'home');
     if (is_front_page()) {
-      array_push($suffixes, 'front-page');
+      array_unshift($suffixes, 'front-page');
     } 
   } elseif (is_search()) {
-    array_push($suffixes, 'search');
+    array_unshift($suffixes, 'search');
   } elseif (is_404()) {
-    array_push($suffixes, '404');
+    array_unshift($suffixes, '404');
   } elseif (is_archive()) {
-    array_push($suffixes, 'archive');
+    array_unshift($suffixes, 'archive');
     if (is_author()) {
-      array_push($suffixes, 'author');
+      array_unshift($suffixes, 'author');
     } elseif (is_category()) {
-      array_push($suffixes, 'category');
+      array_unshift($suffixes, 'category');
     } elseif (is_tag()) {
-      array_push($suffixes, 'tag');
+      array_unshift($suffixes, 'tag');
     } elseif (is_tax()) {
-      array_push($suffixes, 'taxonomy');
+      array_unshift($suffixes, 'taxonomy');
       $queried_object = get_queried_object();
       if ($queried_object && isset($queried_object->taxonomy)) {
-        array_push($suffixes, 'taxonomy-'.$queried_object->taxonomy);
+        array_unshift($suffixes, 'taxonomy-'.$queried_object->taxonomy);
       }
     } elseif (is_date()) {
-      array_push($suffixes, 'date');
+      array_unshift($suffixes, 'date');
     } elseif (get_post_type()) {
-        array_push($suffixes, get_post_type());
-        array_push($suffixes, 'archive-'.get_post_type());
+        array_unshift($suffixes, get_post_type());
+        array_unshift($suffixes, 'archive-'.get_post_type());
       }
   } elseif (is_singular()) {
-    array_push($suffixes, 'singular');
+    array_unshift($suffixes, 'singular');
     if (is_single()) {
-      array_push($suffixes, 'single');
+      array_unshift($suffixes, 'single');
       if (is_attachment()) {
-        array_push($suffixes, 'attachment');
+        array_unshift($suffixes, 'attachment');
       } elseif (get_post_type()) {
-        array_push($suffixes, get_post_type());
-        array_push($suffixes, 'single-'.get_post_type());
+        array_unshift($suffixes, get_post_type());
+        array_unshift($suffixes, 'single-'.get_post_type());
       }
     } elseif (is_page()) {
-      array_push($suffixes, 'page');
+      array_unshift($suffixes, 'page');
       $page_template_slug = get_page_template_slug();
       if ($page_template_slug !== '') {
         $page_template_slug = str_replace('.php', '', $page_template_slug);
-        array_push($suffixes, $page_template_slug);
+        array_unshift($suffixes, $page_template_slug);
       }
     }
   }
   if ($last_suffix) {
     if (is_string($last_suffix)) {
-      array_push($suffixes, $last_suffix);
+      array_unshift($suffixes, $last_suffix);
     } elseif (is_array($last_suffix)) {
       array_merge($suffixes, $last_suffix);
     }

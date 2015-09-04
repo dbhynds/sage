@@ -1,7 +1,7 @@
 <?php
 
 $componenents_includes = [
-  'componentizer/config.php',
+  'componentizer/setup.php',
   'componentizer/admin.php',
   'componentizer/components.php',
 ];
