@@ -181,40 +181,43 @@ class Admin {
   }
   function admin_get_sortable_fields($post) {
     $current_fields = $fields_top = $fields_middle = $fields_bottom = $fields = [];
+
+    $filter = array( 'post_id' => $post->ID );
+    $metabox_ids = [];
+    $metabox_ids = apply_filters( 'acf/location/match_field_groups', $metabox_ids, $filter );
+    
     $field_ids = get_post_meta( $post->ID, '_field_order', true );
     // var_dump($field_ids);
     if ($field_ids) {
       foreach ($field_ids as $field_id) {
-        $field_args = [
-            'id' => $field_id,
-            'name' => get_the_title($field_id),
-          ];
-        if (in_array($field_id,$this->options['top_components'])) {
-          array_push($fields_top,$field_args);
-        } elseif (in_array($field_id,$this->options['bottom_components'])) {
-          array_push($fields_bottom,$field_args);
-        } else {
-          array_push($fields_middle,$field_args);
+        if (in_array($field_id, $metabox_ids)) {
+          $metabox_ids = array_diff($metabox_ids, [$field_id]);
+          $field_args = [
+              'id' => $field_id,
+              'name' => get_the_title($field_id),
+            ];
+          if (in_array($field_id,$this->options['top_components'])) {
+            array_push($fields_top,$field_args);
+          } elseif (in_array($field_id,$this->options['bottom_components'])) {
+            array_push($fields_bottom,$field_args);
+          } else {
+            array_push($fields_middle,$field_args);
+          }
         }
       }
     }
 
-
-    $filter = array( 'post_id' => get_the_ID() );
-    $metabox_ids = array();
-    $metabox_ids = apply_filters( 'acf/location/match_field_groups', $metabox_ids, $filter );
     // var_dump($metabox_ids);
-
-    $field_groups = apply_filters('acf/get_field_groups', array());
-    foreach ($field_groups as $field_group) {
-      if (in_array($field_group['id'], $metabox_ids)) {
+    if (count($metabox_ids)) {
+      $acf_field_posts = get_posts(['post__in' => $metabox_ids,'post_type' => 'acf']);
+      foreach ($acf_field_posts as $acf_field_post) {
         $field_args = [
-            'id' => $field_group['id'],
-            'name' => $field_group['title'],
+            'id' => $acf_field_post->ID,
+            'name' => $acf_field_post->post_title,
           ];
-        if (in_array($field_group['id'],$this->options['top_components'])) {
+        if (in_array($acf_field_post->ID,$this->options['top_components'])) {
           array_push($fields_top,$field_args);
-        } elseif (in_array($field_group['id'],$this->options['bottom_components'])) {
+        } elseif (in_array($acf_field_post->ID,$this->options['bottom_components'])) {
           array_push($fields_bottom,$field_args);
         } else {
           array_push($fields_middle,$field_args);
