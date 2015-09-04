@@ -185,16 +185,20 @@ class Admin {
     $filter = array( 'post_id' => $post->ID );
     $metabox_ids = [];
     $metabox_ids = apply_filters( 'acf/location/match_field_groups', $metabox_ids, $filter );
+
+    $all_fields = array_merge($metabox_ids,$this->options['persistant_fields']);
     
     $field_ids = get_post_meta( $post->ID, '_field_order', true );
     // var_dump($field_ids);
     if ($field_ids) {
       foreach ($field_ids as $field_id) {
-        if (in_array($field_id, $metabox_ids)) {
-          $metabox_ids = array_diff($metabox_ids, [$field_id]);
+        if (in_array($field_id, $all_fields)) {
+          $all_fields = array_diff($all_fields, [$field_id]);
+          $field_title = get_the_title($field_id);
+          if ($field_title === '') $field_title = ucwords($field_id);
           $field_args = [
               'id' => $field_id,
-              'name' => get_the_title($field_id),
+              'name' => $field_title,
             ];
           if (in_array($field_id,$this->options['top_components'])) {
             array_push($fields_top,$field_args);
@@ -203,14 +207,16 @@ class Admin {
           } else {
             array_push($fields_middle,$field_args);
           }
+        } else {
         }
       }
     }
 
     // var_dump($metabox_ids);
-    if (count($metabox_ids)) {
-      $acf_field_posts = get_posts(['post__in' => $metabox_ids,'post_type' => 'acf']);
+    if (count($all_fields)) {
+      $acf_field_posts = get_posts(['post__in' => $all_fields,'post_type' => 'acf']);
       foreach ($acf_field_posts as $acf_field_post) {
+        $all_fields = array_diff($all_fields, [$field_id]);
         $field_args = [
             'id' => $acf_field_post->ID,
             'name' => $acf_field_post->post_title,
@@ -223,6 +229,21 @@ class Admin {
           array_push($fields_middle,$field_args);
         }
       }
+    }
+
+    foreach ($all_fields as $all_field) {
+      $all_fields = array_diff($all_fields, [$all_field]);
+        $field_args = [
+            'id' => $all_field,
+            'name' => ucwords($all_field),
+          ];
+        if (in_array($all_field,$this->options['top_components'])) {
+          array_push($fields_top,$field_args);
+        } elseif (in_array($all_field,$this->options['bottom_components'])) {
+          array_push($fields_bottom,$field_args);
+        } else {
+          array_push($fields_middle,$field_args);
+        }
     }
 
     // var_dump($fields_top);
