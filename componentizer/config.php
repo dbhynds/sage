@@ -14,14 +14,14 @@ $persistant_fields = ['content'];
 
 // Associate Base Components with Advanced Custom Field IDs
 $component_fields = [
-	'another_field' => [11,63],
-	'banner' => [5],
-	'comments' => [4],
-	'content' => ['content'],
-	'entry_meta' => [61],
-	'page_header' => [12],
-	'searchform' => [16],
-	'sidebar' => [64],
+  'another_field' => [11,63],
+  'banner' => [5],
+  'comments' => [4],
+  'content' => ['content'],
+  'entry_meta' => [61],
+  'page_header' => [12],
+  'searchform' => [16],
+  'sidebar' => [64],
 ];
 
 // Array of post IDs that should appear above the reorderable section in the Component Order metabox
