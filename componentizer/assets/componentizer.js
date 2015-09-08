@@ -1,6 +1,6 @@
 (function($) {
   $(document).ready(function(){
-    $('#order-components').addClass('win').sortable({
+    $('#order-components').sortable({
       containment: 'parent',
       handle: '.sortable',
       items: '> .component',
