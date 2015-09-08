@@ -2,10 +2,10 @@
   padding: 1em 0;
 }
 .component-order-sort {
-  padding: .25em 0;
+  padding: 0;
 }
 .component-order-sort-wrap .component {
-  margin: .25em 0;
+  margin: .5em 0;
 }
 .component-order-sort-wrap .component span {
   background: #f5f5f5;
