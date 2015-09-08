@@ -85,6 +85,37 @@ class Admin {
         echo '</table>';
       }
 
+      echo '<h2>'.__('Persistant Field Groups','componentizer').'</h2>';
+      $persistant_fields = $this->options['persistant_fields'];
+      if (count($persistant_fields)) {
+        echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
+        echo '<thead>
+          <tr>
+            <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
+            <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+            <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
+            <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
+          </tr>
+        </thead>
+        <tbody>';
+        foreach ($persistant_fields as $persistant_field) {
+          $field_id = $persistant_field;
+          $template = isset($this->options['component_fields'][$persistant_field]) ? $this->options['component_fields'][$persistant_field] : null;
+          $row_class = ($template === null) ? 'no-component' : null;
+          $location = null;
+          if (in_array($persistant_field, $this->options['top_components'])) $location = __('Top','componentizer');
+          if (in_array($persistant_field, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
+          echo '<tr class="'.$row_class.'">';
+          echo '<td>'.$field_id.'</td>';
+          echo '<td>'.ucwords($persistant_field).'</td>';
+          echo '<td>'.$template.'</td>';
+          echo '<td>'.$location.'</td>';
+          echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
+      }
+
       $component_templates = [];
       $component_files = scandir(get_stylesheet_directory().'/'.Config\COMPONENT_PATH);
       $ignore_files = ['.','..'];
@@ -126,7 +157,7 @@ class Admin {
 
      echo '<table class="wp-list-table widefat fixed striped">';
       echo '<thead><tr>';
-        echo '<th scope="col" id="components-array" class="manage-column column-components-array column-primary">'.__('Paste this array into the Componentizer <code>config.php</code> file.','componentizer').'</th>';
+        echo '<th scope="col" id="components-array" class="manage-column column-components-array column-primary">'.__('Make sure the array keys below match those in the Componentizer <code>config.php</code> file.','componentizer').'</th>';
       echo '</tr></thead>';
       echo '<tbody>';
         echo '<tr><td>';
@@ -161,12 +192,12 @@ class Admin {
       echo '<span>'.$field['name'].'</span>';
       echo '</div>';
     }
-    echo '<div class="component-order-sort">';
+    echo '<div id="order-components" class="component-order-sort">';
     foreach ($fields['middle'] as $field) {
       // var_dump($field['sortable']
       echo '<div class="postbox component">';
       echo '<input type="checkbox" name="component_order_field_order[]" value="'.$field['id'].'" checked style="display: none;" />';
-      echo '<span class="sortable">'.$field['name'].'</span>';
+      echo '<span class="sortable ui-sortable-handle">'.$field['name'].'</span>';
       echo '</div>';
     }
     echo '</div>';
@@ -216,7 +247,7 @@ class Admin {
     if (count($all_fields)) {
       $acf_field_posts = get_posts(['post__in' => $all_fields,'post_type' => 'acf']);
       foreach ($acf_field_posts as $acf_field_post) {
-        $all_fields = array_diff($all_fields, [$field_id]);
+        $all_fields = array_diff($all_fields, [$acf_field_post->ID]);
         $field_args = [
             'id' => $acf_field_post->ID,
             'name' => $acf_field_post->post_title,

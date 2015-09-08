@@ -15,7 +15,7 @@ foreach ($component_fields as $component => $component_field) {
 		}
 	}
 }
-//$fields_components = array_merge($fields_component);
+// $fields_components = array_merge($fields_component);
 
 // Set the above configuration options to an associative array for easy retrieval later
 $options = [

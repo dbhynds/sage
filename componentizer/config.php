@@ -9,7 +9,7 @@
 // Path to component directory relative to current theme directory
 $component_path = 'components';
 
-// Fields that aren't from ACF but should still be included
+// Fields that aren't from ACF but should still be included. Field names should match base name of the component.
 $persistant_fields = ['content'];
 
 // Associate Base Components with Advanced Custom Field IDs

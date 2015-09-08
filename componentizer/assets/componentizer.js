@@ -1,6 +1,10 @@
 (function($) {
-  $('.component-order-sort').sortable({
-    containment: 'parent',
-    handle: 'sortable'
-  });
+	$(document).ready(function(){
+	  $('#order-components').addClass('win').sortable({
+	    containment: 'parent',
+	    handle: '.sortable',
+	    items: '> .component',
+	  });
+	});
+  /**/
 })(jQuery);

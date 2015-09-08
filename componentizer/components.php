@@ -15,15 +15,18 @@ function build($components = null, $suffixes = null) {
   if (!is_array($components)) {
     $component_ids = get_post_meta( $post->ID, '_field_order', true );
   }
+  // var_dump($component_ids);
   $component_fields = Config\get_options('component_fields');
+  // var_dump($component_fields);
   $components = [];
   foreach ($component_ids as $component_id) {
     if (array_key_exists($component_id,$component_fields)) {
       array_push($components, $component_fields[$component_id]);
     }
   }
+  // var_dump($components);
   $suffixes = get_suffixes($suffixes);
-
+  // var_dump($suffixes);
   $i = 0;
   if ($components) foreach ($components as $component) {
     $templates = [Config\COMPONENT_PATH.'/'.$component.'.php'];
@@ -31,7 +34,7 @@ function build($components = null, $suffixes = null) {
       array_push($templates, Config\COMPONENT_PATH.'/'.$component.'-'.$suffix.'.php');
     }
     $file = locate_template($templates,false,false);
-    var_dump($file);
+    // var_dump($file);
     include($file);
   }
 }
