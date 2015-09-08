@@ -25,8 +25,10 @@ $component_fields = [
 ];
 
 // Array of post IDs that should appear above the reorderable section in the Component Order metabox
+// Components on the front end will appear in the order in which they appear in this array
 $top_components = [4,61,5];
 // Array of post IDs that should appear below the reorderable section in the Component Order metabox
+// Components on the front end will appear in the order in which they appear in this array
 $bottom_components = [16];
 
 // Array of post types that should not have the Component Order metabox

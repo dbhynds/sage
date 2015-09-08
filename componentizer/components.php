@@ -15,11 +15,10 @@ function build($components = null, $suffixes = null) {
   if (!is_array($components)) {
     $component_ids = get_post_meta( $post->ID, '_field_order', true );
   }
-  // var_dump($component_ids);
   $component_fields = Config\get_options('component_fields');
   // var_dump($component_fields);
   $components = [];
-  foreach ($component_ids as $component_id) {
+  if ($component_ids) foreach ($component_ids as $component_id) {
     if (array_key_exists($component_id,$component_fields)) {
       array_push($components, $component_fields[$component_id]);
     }
