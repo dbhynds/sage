@@ -8,6 +8,12 @@ use Components\Config as Config;
  * Build page using appropriate components.
  * @param  string|array $template Use string for page-template or post-type or array for custom order.
  */
+
+/**
+ * Build page using appropriate components.
+ * @param  array $components  Optional. An array of components to load in order.
+ * @param  mixed $suffixes    Optional. A string or array or suffixes which should override the template priority
+ */
 function build($components = null, $suffixes = null) {
   global $post;
 
@@ -15,8 +21,12 @@ function build($components = null, $suffixes = null) {
   if (!is_array($components)) {
     $component_ids = get_post_meta( $post->ID, '_field_order', true );
   }
+
+  // Get the base components and their associated field groups
   $component_fields = Config\get_options('component_fields');
   // var_dump($component_fields);
+
+  // Set the base components to load as determined by the $component_ids
   $components = [];
   if ($component_ids) foreach ($component_ids as $component_id) {
     if (array_key_exists($component_id,$component_fields)) {
@@ -24,9 +34,12 @@ function build($components = null, $suffixes = null) {
     }
   }
   // var_dump($components);
+  
+  // Get the list of suffixes to try and load
   $suffixes = get_suffixes($suffixes);
   // var_dump($suffixes);
-  $i = 0;
+  
+  // Locate the approriate component files and load them
   if ($components) foreach ($components as $component) {
     $templates = [Config\COMPONENT_PATH.'/'.$component.'.php'];
     foreach ($suffixes as $suffix) {
@@ -38,7 +51,20 @@ function build($components = null, $suffixes = null) {
   }
 }
 
-
+/**
+ * Setup a hierarchy of suffixes based loosely on WP's template hierarchy
+ * @param  mixed $last_suffix   Optional. A string or array of suffixes that take priority over the generated hierarcy
+ * @return array                An array of suffixes used to determine the template hierarcy
+ * 
+ * This page roughly details the hierarchy of suffixes created in this function:
+ * https://developer.wordpress.org/themes/basics/template-hierarchy/#visual-overview
+ * 
+ * As a general rule, the suffix hierarchy generated captures all of the dark and light blue nodes
+ * in the template hierarchy. Most suffixes associated with orange nodes will not be generated, notably
+ * those representing the slug or id of a post. Exceptions are  'archive-$posttype.php' and
+ * 'custom.php'. This function will generate a suffix for custom post type archives and custom page
+ * templates
+ */
 function get_suffixes($last_suffix = false) {
   $suffixes = ['index'];
   if (is_home()) {
@@ -51,6 +77,9 @@ function get_suffixes($last_suffix = false) {
   } elseif (is_404()) {
     array_unshift($suffixes, '404');
   } elseif (is_archive()) {
+    if (is_paged()) {
+      array_unshift($suffixes, 'paged');
+    }
     array_unshift($suffixes, 'archive');
     if (is_author()) {
       array_unshift($suffixes, 'author');

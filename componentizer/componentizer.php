@@ -1,5 +1,6 @@
 <?php
 
+// Require these files
 $componenents_includes = [
   'componentizer/setup.php',
   'componentizer/admin.php',
