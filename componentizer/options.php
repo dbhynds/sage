@@ -1,6 +1,6 @@
 <?php
 
-namespace Components\Config;
+namespace Components\Options;
 
 require('config.php');
 

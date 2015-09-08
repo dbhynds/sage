@@ -5,7 +5,7 @@ namespace Components\Admin;
 // Don't bother on the front end;
 if (!is_admin()) return;
 
-use Components\Config as Config;
+use Components\Options as Options;
 
 class Admin {
   
@@ -14,7 +14,7 @@ class Admin {
 
   function __construct() {
     // Load up options
-    $this->options = Config\get_options();
+    $this->options = Options\get_options();
     // Enqueue admin scripts and styles
     add_action( 'admin_enqueue_scripts', array($this,'enqueue_scripts') );
     // Make sure ACF is enabled
@@ -131,7 +131,7 @@ class Admin {
 
       // List the base components and their subsidiary files
       $component_templates = [];
-      $component_files = scandir(get_stylesheet_directory().'/'.Config\COMPONENT_PATH);
+      $component_files = scandir(get_stylesheet_directory().'/'.Options\COMPONENT_PATH);
       $ignore_files = ['.','..'];
       foreach ($component_files as $component_file) {
         if (!in_array($component_file, $ignore_files)) {
@@ -141,7 +141,7 @@ class Admin {
         }
       }
       echo '<h2>'.__('Component Files','componentizer').'</h2>';
-      echo '<p>'.__('These files are located in the <code>'.Config\COMPONENT_PATH.'</code> directory of your theme.','componentizer').'</p>';
+      echo '<p>'.__('These files are located in the <code>'.Options\COMPONENT_PATH.'</code> directory of your theme.','componentizer').'</p>';
       echo '<table class="wp-list-table widefat fixed striped">';
       echo '<thead>
         <tr>

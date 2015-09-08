@@ -2,7 +2,7 @@
 
 namespace Components;
 
-use Components\Config as Config;
+use Components\Options as Options;
 
 /**
  * Build page using appropriate components.
@@ -13,7 +13,7 @@ function build($components = false, $suffixes = null) {
   global $post;
 
   // Get the base components and their associated field groups
-  $component_fields = Config\get_options('component_fields');
+  $component_fields = Options\get_options('component_fields');
   // var_dump($component_fields);
 
   // If $components are specifically specified, use the posts' custom order.
@@ -35,9 +35,9 @@ function build($components = false, $suffixes = null) {
   
   // Locate the approriate component files and load them
   if ($components) foreach ($components as $component) {
-    $templates = [Config\COMPONENT_PATH.'/'.$component.'.php'];
+    $templates = [Options\COMPONENT_PATH.'/'.$component.'.php'];
     foreach ($suffixes as $suffix) {
-      array_push($templates, Config\COMPONENT_PATH.'/'.$component.'-'.$suffix.'.php');
+      array_push($templates, Options\COMPONENT_PATH.'/'.$component.'-'.$suffix.'.php');
     }
     $file = locate_template($templates,false,false);
     // var_dump($file);
