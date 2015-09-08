@@ -6,31 +6,25 @@ use Components\Config as Config;
 
 /**
  * Build page using appropriate components.
- * @param  string|array $template Use string for page-template or post-type or array for custom order.
- */
-
-/**
- * Build page using appropriate components.
  * @param  array $components  Optional. An array of components to load in order.
  * @param  mixed $suffixes    Optional. A string or array or suffixes which should override the template priority
  */
-function build($components = null, $suffixes = null) {
+function build($components = false, $suffixes = null) {
   global $post;
-
-  // Unless components are specifically specified, use the posts' custom order.
-  if (!is_array($components)) {
-    $component_ids = get_post_meta( $post->ID, '_field_order', true );
-  }
 
   // Get the base components and their associated field groups
   $component_fields = Config\get_options('component_fields');
   // var_dump($component_fields);
 
-  // Set the base components to load as determined by the $component_ids
-  $components = [];
-  if ($component_ids) foreach ($component_ids as $component_id) {
-    if (array_key_exists($component_id,$component_fields)) {
-      array_push($components, $component_fields[$component_id]);
+  // If $components are specifically specified, use the posts' custom order.
+  if ($components === false) {
+    $components = [];
+    $component_ids = get_post_meta( $post->ID, '_field_order', true );
+    // Set the base components to load as determined by the $component_ids
+    if ($component_ids) foreach ($component_ids as $component_id) {
+      if (array_key_exists($component_id,$component_fields)) {
+        array_push($components, $component_fields[$component_id]);
+      }
     }
   }
   // var_dump($components);
