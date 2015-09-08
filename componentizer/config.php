@@ -9,7 +9,7 @@
 // Path to component directory relative to current theme directory
 $component_path = 'components';
 
-// Fields that aren't from ACF but should still be included. Field names should match base name of the component.
+// Fields that aren't from ACF but should still be included.
 $persistant_fields = ['content'];
 
 // Associate Base Components with Advanced Custom Field IDs
@@ -24,11 +24,9 @@ $component_fields = [
   'sidebar' => [64],
 ];
 
-// Array of post IDs that should appear above the reorderable section in the Component Order metabox
+// Array of post IDs that should appear at the top and bottom of the reorderable section in the Component Order metabox.
 // Components on the front end will appear in the order in which they appear in this array
 $top_components = [4,61,5];
-// Array of post IDs that should appear below the reorderable section in the Component Order metabox
-// Components on the front end will appear in the order in which they appear in this array
 $bottom_components = [16];
 
 // Array of post types that should not have the Component Order metabox
