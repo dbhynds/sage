@@ -43,8 +43,17 @@ $component_fields = [
 ```
 
 ### $top\_components
-These components should appear above the sortable components. They will appear in the order specified in this array.
+These components should appear above the sortable components. This should be an array of the ACF field group IDs or persistant fields. They will appear in the order specified here.
+> #### Example
+> **ACF Field Groups:**
+
+> * Banner (ID = 6)
+* Banner - Front Page (ID = 7)
+
+> **Code:**
+
+> `$top_components = [6,7];`
 ### $bottom\_components
-These components should appear below the sortable components. They will appear in the order specified in this array.
+These components should appear below the sortable components. This should be an array of the ACF field group IDs or persistant fields. They will appear in the order specified here.
 ### $exclude\_order\_for\_post\_types
 Exclude the component order metabox from these post types. The default is nav_menu_item, revision, attachment.
