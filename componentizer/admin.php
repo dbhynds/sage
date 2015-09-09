@@ -20,7 +20,9 @@ class Admin {
     // Make sure ACF is enabled
     add_action( 'admin_init', array($this,'check_for_acf') );
     // Add the reference page to the admin menu
-    add_action( 'admin_menu', array($this,'add_theme_page') );
+    add_action( 'admin_menu', array($this,'add_menu_page'), 20 );
+    // Register Settings
+    add_action( 'admin_init', array($this,'register_settings') );
     // Add metaboxes to the appropriate post types
     $post_types = get_post_types();
     $post_types = array_diff($post_types, $this->options['exclude_order_for_post_types']);
@@ -50,8 +52,11 @@ class Admin {
   }
 
   // Add reference page to the Appearance menu
-  function add_theme_page() {
-    add_theme_page('Componentizer', 'Componentizer', 'edit_theme_options', 'componentizer', array($this,'assign_components_to_templates') );
+  function add_menu_page() {
+    add_submenu_page('edit.php?post_type=acf', __('Componentizer','componentizer'), __('Componentizer','componentizer'), 'manage_options', 'componentizer', array($this,'assign_components_to_templates') );
+  }
+  function register_settings() {
+
   }
   function assign_components_to_templates() {
     ?>
@@ -59,75 +64,80 @@ class Admin {
       <?php 
       echo '<h1>'.__('Compontentizer','componentizer').'</h1>';
       echo '<hr />';
+      echo '<form method="post">';
 
-      // List all ACF Field Groups and their associated base components
-      echo '<h2>'.__('Advanced Custom Field Groups','componentizer').'</h2>';
-      $acf_fields = get_posts([
-        'post_type' => 'acf',
-        'posts_per_page' => -1,
-        'order' => 'ASC',
-        'orderby' => 'title',
-        ]);
-      if ($acf_fields && count($acf_fields)) {
-        echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
-        echo '<thead>
-          <tr>
-            <th scope="col" id="id" class="manage-column column-id" style="width: 2em;">'.__('ID','componentizer').'</th>
-            <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
-            <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
-            <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
-          </tr>
-        </thead>
-        <tbody>';
-        foreach ($acf_fields as $acf_field) {
-          $field_id = $acf_field->ID;
-          $template = isset($this->options['component_fields'][$field_id]) ? $this->options['component_fields'][$field_id] : null;
-          $row_class = ($template === null) ? 'no-component' : null;
-          $location = null;
-          if (in_array($field_id, $this->options['top_components'])) $location = __('Top','componentizer');
-          if (in_array($field_id, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
-          echo '<tr class="'.$row_class.'">';
-          echo '<td>'.$field_id.'</td>';
-          echo '<td>'.$acf_field->post_title.'</td>';
-          echo '<td>'.$template.'</td>';
-          echo '<td>'.$location.'</td>';
-          echo '</tr>';
+        // List all ACF Field Groups and their associated base components
+        echo '<h2>'.__('Advanced Custom Field Groups','componentizer').'</h2>';
+        $acf_fields = get_posts([
+          'post_type' => 'acf',
+          'posts_per_page' => -1,
+          'order' => 'ASC',
+          'orderby' => 'title',
+          ]);
+        if ($acf_fields && count($acf_fields)) {
+          echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
+          echo '<thead>
+            <tr>
+              <th scope="col" id="id" class="manage-column column-id" style="width: 2em;">'.__('ID','componentizer').'</th>
+              <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+              <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
+              <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
+            </tr>
+          </thead>
+          <tbody>';
+          foreach ($acf_fields as $acf_field) {
+            $field_id = $acf_field->ID;
+            $template = isset($this->options['component_fields'][$field_id]) ? $this->options['component_fields'][$field_id] : null;
+            $row_class = ($template === null) ? 'no-component' : null;
+            $location = null;
+            if (in_array($field_id, $this->options['top_components'])) $location = __('Top','componentizer');
+            if (in_array($field_id, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
+            echo '<tr class="'.$row_class.'">';
+            echo '<td>'.$field_id.'</td>';
+            echo '<td>'.$acf_field->post_title.'</td>';
+            echo '<td>'.$template.'</td>';
+            echo '<td>'.$location.'</td>';
+            echo '</tr>';
+          }
+          echo '</tbody>';
+          echo '</table>';
         }
-        echo '</tbody>';
-        echo '</table>';
-      }
+        submit_button();
 
-      // List any field groups not created via ACF and their associated base components
-      echo '<h2>'.__('Persistant Field Groups','componentizer').'</h2>';
-      $persistant_fields = $this->options['persistant_fields'];
-      if (count($persistant_fields)) {
-        echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
-        echo '<thead>
-          <tr>
-            <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
-            <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
-            <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
-            <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
-          </tr>
-        </thead>
-        <tbody>';
-        foreach ($persistant_fields as $persistant_field) {
-          $field_id = $persistant_field;
-          $template = isset($this->options['component_fields'][$persistant_field]) ? $this->options['component_fields'][$persistant_field] : null;
-          $row_class = ($template === null) ? 'no-component' : null;
-          $location = null;
-          if (in_array($persistant_field, $this->options['top_components'])) $location = __('Top','componentizer');
-          if (in_array($persistant_field, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
-          echo '<tr class="'.$row_class.'">';
-          echo '<td>'.$field_id.'</td>';
-          echo '<td>'.ucwords($persistant_field).'</td>';
-          echo '<td>'.$template.'</td>';
-          echo '<td>'.$location.'</td>';
-          echo '</tr>';
+        // List any field groups not created via ACF and their associated base components
+        echo '<h2>'.__('Persistant Field Groups','componentizer').'</h2>';
+        $persistant_fields = $this->options['persistant_fields'];
+        if (count($persistant_fields)) {
+          echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
+          echo '<thead>
+            <tr>
+              <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
+              <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+              <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
+              <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
+            </tr>
+          </thead>
+          <tbody>';
+          foreach ($persistant_fields as $persistant_field) {
+            $field_id = $persistant_field;
+            $template = isset($this->options['component_fields'][$persistant_field]) ? $this->options['component_fields'][$persistant_field] : null;
+            $row_class = ($template === null) ? 'no-component' : null;
+            $location = null;
+            if (in_array($persistant_field, $this->options['top_components'])) $location = __('Top','componentizer');
+            if (in_array($persistant_field, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
+            echo '<tr class="'.$row_class.'">';
+            echo '<td>'.$field_id.'</td>';
+            echo '<td>'.ucwords($persistant_field).'</td>';
+            echo '<td>'.$template.'</td>';
+            echo '<td>'.$location.'</td>';
+            echo '</tr>';
+          }
+          echo '</tbody>';
+          echo '</table>';
         }
-        echo '</tbody>';
-        echo '</table>';
-      }
+        submit_button();
+        
+      echo '</form>';
 
       // List the base components and their subsidiary files
       $component_templates = [];
