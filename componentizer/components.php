@@ -14,6 +14,7 @@ function build($components = false, $suffixes = null) {
 
   // Get the base components and their associated field groups
   $component_fields = get_option( 'componentizer_fields' );
+  $visible_on_archive = ['content'];
   // var_dump($component_fields);
 
   // If $components are specifically specified, use the posts' custom order.
@@ -23,11 +24,12 @@ function build($components = false, $suffixes = null) {
     // Set the base components to load as determined by the $component_ids
     if ($component_ids) foreach ($component_ids as $component_id) {
       if (array_key_exists($component_id,$component_fields)) {
-        array_push($components, $component_fields[$component_id]['template']);
+        if (is_singular() || in_array($component_id,$visible_on_archive)) {
+          array_push($components, $component_fields[$component_id]['template']);
+        }
       }
     }
   }
-  // var_dump($components);
   
   // Get the list of suffixes to try and load
   $suffixes = get_suffixes($suffixes);
