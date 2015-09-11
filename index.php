@@ -5,6 +5,7 @@ while (have_posts()) :
 	the_post();
 	Components\build();
 endwhile;
+
 ?>
 <?php if (!have_posts()) : ?>
   <div class="alert alert-warning">

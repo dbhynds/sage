@@ -13,7 +13,7 @@ function build($components = false, $suffixes = null) {
   global $post;
 
   // Get the base components and their associated field groups
-  $component_fields = Options\get_options('component_fields');
+  $component_fields = get_option( 'componentizer_fields' );
   // var_dump($component_fields);
 
   // If $components are specifically specified, use the posts' custom order.
@@ -23,7 +23,7 @@ function build($components = false, $suffixes = null) {
     // Set the base components to load as determined by the $component_ids
     if ($component_ids) foreach ($component_ids as $component_id) {
       if (array_key_exists($component_id,$component_fields)) {
-        array_push($components, $component_fields[$component_id]);
+        array_push($components, $component_fields[$component_id]['template']);
       }
     }
   }

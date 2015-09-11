@@ -11,6 +11,7 @@ class Admin {
   
   // Options that will be loaded via config
   var $options = array();
+  var $component_templates = array();
 
   function __construct() {
     // Load up options
@@ -53,103 +54,230 @@ class Admin {
 
   // Add reference page to the Appearance menu
   function add_menu_page() {
-    add_submenu_page('edit.php?post_type=acf', __('Componentizer','componentizer'), __('Componentizer','componentizer'), 'manage_options', 'componentizer', array($this,'assign_components_to_templates') );
+    add_options_page(__('Componentizer','componentizer'), __('Componentizer','componentizer'), 'manage_options', 'componentizer', array($this,'assign_components_to_templates') );
+    // add_submenu_page('edit.php?post_type=acf', __('Componentizer','componentizer'), __('Componentizer','componentizer'), 'manage_options', 'componentizer', array($this,'assign_components_to_templates') );
   }
   function register_settings() {
+    $this->component_templates = $this->get_component_templates();
+    register_setting( 'componentizerSettings', 'componentizer_fields' );
+    add_settings_section(
+      'componentizer_fields',
+      __( 'Field Groups', 'componentizer' ),
+      array($this,'assign_field_groups'),
+      'componentizerSettings'
+    );
+    register_setting( 'componentizerSettings', 'componentizer_location_orders' );
+    add_settings_section(
+      'componentizer_location_orders',
+      __( 'Location Orders', 'componentizer' ),
+      array($this,'assign_location_orders'),
+      'componentizerSettings'
+    );
+  }
+  function assign_field_groups() {
+    $options = get_option( 'componentizer_fields' );
+    // var_dump($options);
+    // List all ACF Field Groups and their associated base components
+    $acf_fields = get_posts([
+      'post_type' => 'acf',
+      'posts_per_page' => -1,
+      'order' => 'ASC',
+      'orderby' => 'title',
+      ]);
+    echo '<h4>'.__('Advanced Custom Fields Groups','componentizer').'</h4>';
+    if ($acf_fields && count($acf_fields)) {
+      echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
+      echo '<thead>
+        <tr>
+          <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
+          <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+          <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
+          <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
+        </tr>
+      </thead>
+      <tbody>';
+      foreach ($acf_fields as $acf_field) {
+        $field_id = $acf_field->ID;
+        $template = '<select name="componentizer_fields['.$field_id.'][template]">';
+        $template .= '<option value="">-- '.__('None','componentizer').' --</option>';
+        $selected = $row_class = null;
+        foreach ($this->component_templates as $base_component => $value) {
+          if (isset($options[$field_id]['template'])) {
+            $selected = ($options[$field_id]['template'] == $base_component) ? 'selected' : null;
+            if ($options[$field_id]['template'] === "") $row_class = 'no-component';
+          } else {
+            $row_class = 'no-component';
+          }
+          
+          $template .= '<option '.$selected.'>'.$base_component.'</option>';
+        }
+        $template .= '</select>';
+        
+        $in_top = $in_sortable = $in_bottom = null;
+        if ($options[$field_id]['location'] == 'top') {
+          $in_top = 'checked';
+        } elseif ($options[$field_id]['location'] == 'bottom') {
+          $in_bottom = 'checked';
+        } else {
+          $in_sortable = 'checked';
+        }
+        
+        echo '<tr class="'.$row_class.'">';
+        echo '<td>'.$field_id.'</td>';
+        echo '<td>'.$acf_field->post_title.'</td>';
+        echo '<td>'.$template.'</td>';
+        echo '<td>';
+          echo '<label for="'.$field_id.'_top">';
+            echo '<input type="radio" id="'.$field_id.'_top" name="componentizer_fields['.$field_id.'][location]" '.$in_top.' value="top">';
+            _e('Top','componentizer');
+          echo '</label> ';
+          echo '<label for="'.$field_id.'_sortable">';
+            echo '<input type="radio" id="'.$field_id.'_sortable" name="componentizer_fields['.$field_id.'][location]" '.$in_sortable.' value="sortable">';
+            _e('Sortable','componentizer');
+          echo '</label> ';
+          echo '<label for="'.$field_id.'_bottom">';
+            echo '<input type="radio" id="'.$field_id.'_bottom" name="componentizer_fields['.$field_id.'][location]" '.$in_bottom.' value="bottom">';
+            _e('Bottom','componentizer');
+          echo '</label> ';
+        echo '</td>';
+        echo '</tr>';
+      }
+      echo '</tbody>';
+      echo '</table>';
+    }
+    submit_button();
 
+
+    echo '<h4>'.__('Persistant Fields Groups','componentizer').'</h4>';
+    $persistant_fields = $this->options['persistant_fields'];
+    if (count($persistant_fields)) {
+      echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
+      echo '<thead>
+        <tr>
+          <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
+          <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+          <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
+          <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
+        </tr>
+      </thead>
+      <tbody>';
+      foreach ($persistant_fields as $persistant_field) {
+        $field_id = $persistant_field;
+        $template = '<select name="componentizer_fields['.$field_id.'][template]">';
+        $template .= '<option>-- '.__('None','componentizer').' --</option>';
+        $selected = $row_class = null;
+        foreach ($this->component_templates as $base_component => $value) {
+          if (isset($options[$field_id]['template'])) {
+            $selected = ($options[$field_id]['template'] == $base_component) ? 'selected' : null;
+          } else {
+            $row_class = 'no-component';
+          }
+          
+          $template .= '<option '.$selected.'>'.$base_component.'</option>';
+        }
+        $template .= '</select>';
+        $in_top = $in_sortable = $in_bottom = null;
+        if ($options[$field_id]['location'] == 'top') {
+          $in_top = 'checked';
+        } elseif ($options[$field_id]['location'] == 'bottom') {
+          $in_bottom = 'checked';
+        } else {
+          $in_sortable = 'checked';
+        }
+        echo '<tr class="'.$row_class.'">';
+        echo '<td>'.$field_id.'</td>';
+        echo '<td>'.ucwords($persistant_field).'</td>';
+        echo '<td>'.$template.'</td>';
+        echo '<td>';
+          echo '<label for="'.$field_id.'_top">';
+            echo '<input type="radio" id="'.$field_id.'_top" name="componentizer_fields['.$field_id.'][location]" '.$in_top.' value="top">';
+            _e('Top','componentizer');
+          echo '</label> ';
+          echo '<label for="'.$field_id.'_sortable">';
+            echo '<input type="radio" id="'.$field_id.'_sortable" name="componentizer_fields['.$field_id.'][location]" '.$in_sortable.' value="sortable">';
+            _e('Sortable','componentizer');
+          echo '</label> ';
+          echo '<label for="'.$field_id.'_bottom">';
+            echo '<input type="radio" id="'.$field_id.'_bottom" name="componentizer_fields['.$field_id.'][location]" '.$in_bottom.' value="bottom">';
+            _e('Bottom','componentizer');
+          echo '</label> ';
+        echo '</tr>';
+      }
+      echo '</tbody>';
+      echo '</table>';
+    }
+    submit_button();
+  }
+  function assign_location_orders() {
+    $location_orders = get_option('componentizer_location_orders');
+    $top_fields = (array_key_exists('top', $location_orders)) ? $location_orders['top'] : [];
+    $bottom_fields = (array_key_exists('bottom', $location_orders)) ? $location_orders['bottom'] : [];
+    $fields = get_option( 'componentizer_fields' );
+    $new_bottom_fields = $new_top_fields = [];
+    foreach ($fields as $field_id => $field) {
+      $field_id = (string)$field_id;
+      if ($field['location'] == 'top') array_push($new_top_fields, $field_id);
+      if ($field['location'] == 'bottom') array_push($new_bottom_fields, $field_id);
+    }
+
+    foreach ($top_fields as $key => $top_field) {
+      if (!in_array($top_field, $new_top_fields)) unset($top_fields[$key]);
+    }
+    $new_top_fields = array_merge($top_fields,$new_top_fields);
+    $top_fields = array_unique($new_top_fields);
+
+    foreach ($bottom_fields as $key => $bottom_field) {
+      if (!in_array($bottom_field, $new_bottom_fields)) unset($bottom_fields[$key]);
+    }
+    $new_bottom_fields = array_merge($bottom_fields,$new_bottom_fields);
+    $bottom_fields = array_unique($new_bottom_fields);
+    
+    echo '<div class="card">';
+      echo '<h4>'.__('Top Components','componentizer').'</h4>';
+      echo '<div class="component-order-sort-wrap">';
+      echo '<div id="order-top-components" class="order-components component-order-sort">';
+      foreach ($top_fields as $top_field) {
+        $title = get_the_title($top_field);
+        if (!$title) $title = ucwords($top_field);
+        echo '<div class="postbox component">';
+        echo '<input type="checkbox" name="componentizer_location_orders[top][]" value="'.$top_field.'" checked style="display: none;" />';
+        echo '<span class="sortable ui-sortable-handle">'.$title.'</span>';
+        echo '</div>';
+      }
+      echo '</div>';
+      echo '</div>';
+    echo '</div>';
+
+    echo '<div class="card">';
+      echo '<h4>'.__('Bottom Components','componentizer').'</h4>';
+      echo '<div class="component-order-sort-wrap">';
+      echo '<div id="order-bottom-components" class="order-components component-order-sort">';
+      foreach ($bottom_fields as $bottom_field) {
+        $title = get_the_title($bottom_field);
+        if (!$title) $title = ucwords($bottom_field);
+        echo '<div class="postbox component">';
+        echo '<input type="checkbox" name="componentizer_location_orders[bottom][]" value="'.$bottom_field.'" checked style="display: none;" />';
+        echo '<span class="sortable ui-sortable-handle">'.$title.'</span>';
+        echo '</div>';
+      }
+      echo '</div>';
+      echo '</div>';
+    echo '</div>';
+
+    submit_button();
+    
   }
   function assign_components_to_templates() {
     ?>
     <div class="wrap">
       <?php 
       echo '<h1>'.__('Compontentizer','componentizer').'</h1>';
-      echo '<hr />';
-      echo '<form method="post">';
-
-        // List all ACF Field Groups and their associated base components
-        echo '<h2>'.__('Advanced Custom Field Groups','componentizer').'</h2>';
-        $acf_fields = get_posts([
-          'post_type' => 'acf',
-          'posts_per_page' => -1,
-          'order' => 'ASC',
-          'orderby' => 'title',
-          ]);
-        if ($acf_fields && count($acf_fields)) {
-          echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
-          echo '<thead>
-            <tr>
-              <th scope="col" id="id" class="manage-column column-id" style="width: 2em;">'.__('ID','componentizer').'</th>
-              <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
-              <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
-              <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
-            </tr>
-          </thead>
-          <tbody>';
-          foreach ($acf_fields as $acf_field) {
-            $field_id = $acf_field->ID;
-            $template = isset($this->options['component_fields'][$field_id]) ? $this->options['component_fields'][$field_id] : null;
-            $row_class = ($template === null) ? 'no-component' : null;
-            $location = null;
-            if (in_array($field_id, $this->options['top_components'])) $location = __('Top','componentizer');
-            if (in_array($field_id, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
-            echo '<tr class="'.$row_class.'">';
-            echo '<td>'.$field_id.'</td>';
-            echo '<td>'.$acf_field->post_title.'</td>';
-            echo '<td>'.$template.'</td>';
-            echo '<td>'.$location.'</td>';
-            echo '</tr>';
-          }
-          echo '</tbody>';
-          echo '</table>';
-        }
-        submit_button();
-
-        // List any field groups not created via ACF and their associated base components
-        echo '<h2>'.__('Persistant Field Groups','componentizer').'</h2>';
-        $persistant_fields = $this->options['persistant_fields'];
-        if (count($persistant_fields)) {
-          echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
-          echo '<thead>
-            <tr>
-              <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
-              <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
-              <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
-              <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
-            </tr>
-          </thead>
-          <tbody>';
-          foreach ($persistant_fields as $persistant_field) {
-            $field_id = $persistant_field;
-            $template = isset($this->options['component_fields'][$persistant_field]) ? $this->options['component_fields'][$persistant_field] : null;
-            $row_class = ($template === null) ? 'no-component' : null;
-            $location = null;
-            if (in_array($persistant_field, $this->options['top_components'])) $location = __('Top','componentizer');
-            if (in_array($persistant_field, $this->options['bottom_components'])) $location = __('Bottom','componentizer');
-            echo '<tr class="'.$row_class.'">';
-            echo '<td>'.$field_id.'</td>';
-            echo '<td>'.ucwords($persistant_field).'</td>';
-            echo '<td>'.$template.'</td>';
-            echo '<td>'.$location.'</td>';
-            echo '</tr>';
-          }
-          echo '</tbody>';
-          echo '</table>';
-        }
-        submit_button();
-        
+      echo '<form id="basic" action="options.php" method="post" style="clear:both;">';
+        settings_fields( 'componentizerSettings' );
+        do_settings_sections( 'componentizerSettings' );
       echo '</form>';
 
       // List the base components and their subsidiary files
-      $component_templates = [];
-      $component_files = scandir(get_stylesheet_directory().'/'.Options\COMPONENT_PATH);
-      $ignore_files = ['.','..'];
-      foreach ($component_files as $component_file) {
-        if (!in_array($component_file, $ignore_files)) {
-          $component_name = explode('-',str_replace('.php', '', $component_file));
-          $component_base = array_shift($component_name);
-          $component_templates[$component_base][] = implode('-', $component_name);
-        }
-      }
       echo '<h2>'.__('Component Files','componentizer').'</h2>';
       echo '<p>'.__('These files are located in the <code>'.Options\COMPONENT_PATH.'</code> directory of your theme.','componentizer').'</p>';
       echo '<table class="wp-list-table widefat fixed striped">';
@@ -162,7 +290,7 @@ class Admin {
         </tr>
       </thead>
       <tbody>';
-      foreach ($component_templates as $base_component => $sub_component) {
+      foreach ($this->component_templates as $base_component => $sub_component) {
         echo '<tr>';
           echo '<td>'.$base_component.'</td>';
           echo '<td>'.implode('<br />',$sub_component).'</td>';
@@ -188,7 +316,7 @@ class Admin {
         echo '<tr><td>';
           echo '<code>';
           echo '$component_fields = [<br />';
-          foreach ($component_templates as $base_component => $sub_component) {
+          foreach ($this->component_templates as $base_component => $sub_component) {
             echo '\''.$base_component.'\' => [],<br />';
           }
           echo '];';
@@ -200,6 +328,19 @@ class Admin {
       ?>
     </div>
     <?php
+  }
+
+  function get_component_templates() {
+    $component_files = scandir(get_stylesheet_directory().'/'.Options\COMPONENT_PATH);
+    $ignore_files = ['.','..'];
+    foreach ($component_files as $component_file) {
+      if (!in_array($component_file, $ignore_files)) {
+        $component_name = explode('-',str_replace('.php', '', $component_file));
+        $component_base = array_shift($component_name);
+        $component_templates[$component_base][] = implode('-', $component_name);
+      }
+    }
+    return $component_templates;
   }
   
   // Add the component order metabox to the editor page
@@ -225,7 +366,7 @@ class Admin {
       echo '</div>';
     }
     // List sortable components
-    echo '<div id="order-components" class="component-order-sort">';
+    echo '<div id="order-components" class="order-components component-order-sort">';
     foreach ($fields['middle'] as $field) {
       // var_dump($field['sortable']
       echo '<div class="postbox component">';
@@ -263,6 +404,8 @@ class Admin {
     // var_dump($field_ids);
 
     // If there is a saved order, sort the fields into top, middle, or bottom
+    
+    $options = get_option( 'componentizer_fields' );
     if ($field_ids) {
       foreach ($field_ids as $field_id) {
         if (in_array($field_id, $all_fields)) {
@@ -276,9 +419,10 @@ class Admin {
               'name' => $field_title,
             ];
           // Add it to the appropriate section
-          if (in_array($field_id,$this->options['top_components'])) {
+          
+          if ($options[$field_id]['location'] == 'top') {
             array_push($fields_top,$field_args);
-          } elseif (in_array($field_id,$this->options['bottom_components'])) {
+          } elseif ($options[$field_id]['location'] == 'bottom') {
             array_push($fields_bottom,$field_args);
           } else {
             array_push($fields_middle,$field_args);
@@ -295,15 +439,16 @@ class Admin {
       foreach ($acf_field_posts as $acf_field_post) {
         // If this field exists, unset it in $all_fields
         $all_fields = array_diff($all_fields, [$acf_field_post->ID]);
+        $field_id = $acf_field_post->ID;
         // Setup the field data
         $field_args = [
-            'id' => $acf_field_post->ID,
+            'id' => $field_id,
             'name' => $acf_field_post->post_title,
           ];
         // Add it to the appropriate section
-        if (in_array($acf_field_post->ID,$this->options['top_components'])) {
+        if ($options[$field_id]['location'] == 'top') {
           array_push($fields_top,$field_args);
-        } elseif (in_array($acf_field_post->ID,$this->options['bottom_components'])) {
+        } elseif ($options[$field_id]['location'] == 'bottom') {
           array_push($fields_bottom,$field_args);
         } else {
           array_push($fields_middle,$field_args);
@@ -321,18 +466,21 @@ class Admin {
           'name' => ucwords($all_field),
         ];
       // Add it to the appropriate section
-      if (in_array($all_field,$this->options['top_components'])) {
+      if ($options[$all_field]['location'] ==  'top') {
         array_push($fields_top,$field_args);
-      } elseif (in_array($all_field,$this->options['bottom_components'])) {
+      } elseif ($options[$all_field]['location'] == 'bottom') {
         array_push($fields_bottom,$field_args);
       } else {
         array_push($fields_middle,$field_args);
       }
     }
 
+    $location_orders = get_option('componentizer_location_orders');
+    $this->options['top_components'] = $location_orders['top'];
+    $this->options['bottom_components'] = $location_orders['bottom'];
     // Sort the top and bottom according to the order specified in the config file
     usort($fields_top, array($this,'sort_top'));
-    usort($fields_top, array($this,'sort_bottom'));
+    usort($fields_bottom, array($this,'sort_bottom'));
 
     // var_dump($fields_top);
     // var_dump($fields_top);
@@ -351,19 +499,19 @@ class Admin {
     // Sort by array key (the order specified in the config file)
     $a_key = array_search($a['id'], $this->options['top_components']);
     $b_key = array_search($b['id'], $this->options['top_components']);
-    if ($a == $b) {
+    if ($a_key == $b_key) {
       return 0;
     }
-    return ($a < $b) ? -1 : 1;
+    return ($a_key < $b_key) ? -1 : 1;
   }
   function sort_bottom($a, $b) {
     // Sort by array key (the order specified in the config file)
     $a_key = array_search($a['id'], $this->options['bottom_components']);
     $b_key = array_search($b['id'], $this->options['bottom_components']);
-    if ($a == $b) {
+    if ($a_key == $b_key) {
       return 0;
     }
-    return ($a < $b) ? -1 : 1;
+    return ($a_key < $b_key) ? -1 : 1;
   }
   function component_order_save_meta_box_data($post_id) {
 
