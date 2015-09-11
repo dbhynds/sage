@@ -90,7 +90,7 @@ class Admin {
       echo '<thead>
         <tr>
           <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
-          <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+          <th scope="col" id="title" class="manage-column column-title">'.__('Title','componentizer').'</th>
           <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
           <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
         </tr>
@@ -155,7 +155,7 @@ class Admin {
       echo '<thead>
         <tr>
           <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
-          <th scope="col" id="title" class="manage-column column-title column-primary">'.__('Title','componentizer').'</th>
+          <th scope="col" id="title" class="manage-column column-title">'.__('Title','componentizer').'</th>
           <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
           <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
         </tr>
@@ -269,7 +269,7 @@ class Admin {
   }
   function assign_components_to_templates() {
     ?>
-    <div class="wrap">
+    <div id="componentizer-settings" class="wrap">
       <?php 
       echo '<h1>'.__('Compontentizer','componentizer').'</h1>';
       echo '<form id="basic" action="options.php" method="post" style="clear:both;">';
@@ -304,24 +304,6 @@ class Admin {
           echo '<td>'.implode('<br />',$sub_components).'</td>';
         echo '</tr>';
       }
-      echo '</tbody>';
-      echo '</table>';
-
-      // Provide an empty sample array for config.php
-      echo '<table class="wp-list-table widefat fixed striped">';
-      echo '<thead><tr>';
-        echo '<th scope="col" id="components-array" class="manage-column column-components-array column-primary">'.__('Make sure the array keys below match those in the Componentizer <code>config.php</code> file.','componentizer').'</th>';
-      echo '</tr></thead>';
-      echo '<tbody>';
-        echo '<tr><td>';
-          echo '<code>';
-          echo '$component_fields = [<br />';
-          foreach ($this->component_templates as $base_component => $sub_component) {
-            echo '\''.$base_component.'\' => [],<br />';
-          }
-          echo '];';
-          echo '</code>';
-        echo '</td></tr>';
       echo '</tbody>';
       echo '</table>';
 
