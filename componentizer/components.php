@@ -116,7 +116,7 @@ function get_suffixes($last_suffix = false) {
     if (is_string($last_suffix)) {
       array_unshift($suffixes, $last_suffix);
     } elseif (is_array($last_suffix)) {
-      array_merge($suffixes, $last_suffix);
+      $suffixes = array_merge($suffixes, $last_suffix);
     }
   }
   return $suffixes;

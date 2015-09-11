@@ -6,22 +6,9 @@ require('config.php');
 
 define(__NAMESPACE__ . '\COMPONENT_PATH',$component_path);
 
-// Invert $component_fields for easier searching
-$fields_components = [];
-foreach ($component_fields as $component => $component_field) {
-  if (count($component_field)) {
-    foreach ($component_field as $field_id) {
-      $fields_components[$field_id] = $component;
-    }
-  }
-}
-
 // Set the above configuration options to an associative array for easy retrieval later
 $options = [
-  'top_components' => $top_components, // Array of post IDs that should appear above the reorderable section in the Field Order metabox
-  'bottom_components' => $bottom_components, // Array of post IDs that should appear below the reorderable section in the Field Order metabox
   'exclude_order_for_post_types' => $exclude_order_for_post_types, // Array of post types that should not have the Field Order metabox
-  'component_fields' => $fields_components,
   'persistant_fields' => $persistant_fields,
 ];
 /**
