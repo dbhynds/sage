@@ -89,7 +89,6 @@ class Admin {
       echo '<table id="acf_field_groups" class="wp-list-table widefat fixed striped">';
       echo '<thead>
         <tr>
-          <th scope="col" id="id" class="manage-column column-id">'.__('ID','componentizer').'</th>
           <th scope="col" id="title" class="manage-column column-title">'.__('Title','componentizer').'</th>
           <th scope="col" id="base-component" class="manage-column column-base-component">'.__('Base Component','componentizer').'</th>
           <th scope="col" id="location" class="manage-column column-location">'.__('Location','componentizer').'</th>
@@ -123,7 +122,7 @@ class Admin {
         }
         
         echo '<tr class="'.$row_class.'">';
-        echo '<td>'.$field_id.'</td>';
+        // echo '<td>'.$field_id.'</td>';
         echo '<td>'.$acf_field->post_title.'</td>';
         echo '<td>'.$template.'</td>';
         echo '<td>';
