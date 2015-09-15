@@ -14,12 +14,12 @@ function build($components = false, $suffixes = null) {
 
   // Get the base components and their associated field groups
   $component_fields = get_option( 'componentizer_fields' );
-  $visible_on_archive = ['content'];
+  $visible_on_archive = array('content');
   // var_dump($component_fields);
 
   // If $components are specifically specified, use the posts' custom order.
   if ($components === false) {
-    $components = [];
+    $components = array();
     $component_ids = get_post_meta( $post->ID, '_field_order', true );
     // Set the base components to load as determined by the $component_ids
     if ($component_ids) foreach ($component_ids as $component_id) {
@@ -37,7 +37,7 @@ function build($components = false, $suffixes = null) {
   
   // Locate the approriate component files and load them
   if ($components) foreach ($components as $component) {
-    $templates = [Options\COMPONENT_PATH.'/'.$component.'.php'];
+    $templates = array(Options\COMPONENT_PATH.'/'.$component.'.php');
     foreach ($suffixes as $suffix) {
       array_push($templates, Options\COMPONENT_PATH.'/'.$component.'-'.$suffix.'.php');
     }
@@ -62,7 +62,7 @@ function build($components = false, $suffixes = null) {
  * templates
  */
 function get_suffixes($last_suffix = false) {
-  $suffixes = ['index'];
+  $suffixes = array('index');
   if (is_home()) {
     array_unshift($suffixes,'home');
     if (is_front_page()) {
