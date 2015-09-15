@@ -10,7 +10,7 @@
 $component_path = 'components';
 
 // Fields that aren't from ACF but should still be included.
-$persistant_fields = array('content');
+$persistant_fields = ['content'];
 
 // Array of post types that should not have the Component Order metabox
-$exclude_order_for_post_types = array('nav_menu_item', 'revision', 'attachment');
+$exclude_order_for_post_types = ['nav_menu_item', 'revision', 'attachment'];

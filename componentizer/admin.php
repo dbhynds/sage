@@ -16,7 +16,6 @@ class Admin {
   function __construct() {
     // Load up options
     $this->options = Options\get_options();
-    $location_orders = get_option('componentizer_location_orders');
     // Enqueue admin scripts and styles
     add_action( 'admin_enqueue_scripts', array($this,'enqueue_scripts') );
     // Make sure ACF is enabled
@@ -32,7 +31,6 @@ class Admin {
       add_action( 'add_meta_boxes_'.$post_type, array($this,'add_component_order_box') );
       add_action( 'save_post', array($this,'component_order_save_meta_box_data') );
     }
-
   }
 
   // Make sure ACF is enabled
@@ -210,10 +208,11 @@ class Admin {
     submit_button();
   }
   function assign_location_orders() {
+    $location_orders = get_option('componentizer_location_orders');
     $top_fields = (array_key_exists('top', $location_orders)) ? $location_orders['top'] : [];
     $bottom_fields = (array_key_exists('bottom', $location_orders)) ? $location_orders['bottom'] : [];
     $fields = get_option( 'componentizer_fields' );
-    $new_bottom_fields = $new_top_fields = array();
+    $new_bottom_fields = $new_top_fields = [];
     foreach ($fields as $field_id => $field) {
       $field_id = (string)$field_id;
       if ($field['location'] == 'top') array_push($new_top_fields, $field_id);
@@ -295,7 +294,7 @@ class Admin {
           echo '<td>'.$base_component.'</td>';
           echo '<td>'.implode('<br />',$sub_component).'</td>';
           echo '<td>'.$base_component.'.php</td>';
-          $sub_components = array();
+          $sub_components = [];
           foreach ($sub_component as $sub_component_single) {
             if ($sub_component_single !== '') {
               array_push($sub_components, $base_component.'-'.$sub_component_single.'.php');
@@ -314,7 +313,7 @@ class Admin {
 
   function get_component_templates() {
     $component_files = scandir(get_stylesheet_directory().'/'.Options\COMPONENT_PATH);
-    $ignore_files = array('.','..');
+    $ignore_files = ['.','..'];
     foreach ($component_files as $component_file) {
       if (!in_array($component_file, $ignore_files)) {
         $component_name = explode('-',str_replace('.php', '', $component_file));
@@ -369,22 +368,13 @@ class Admin {
   }
   function admin_get_sortable_fields($post) {
     // Set everything to empty arrays
-    $current_fields = $fields_top = $fields_middle = $fields_bottom = $fields = array();
+    $current_fields = $fields_top = $fields_middle = $fields_bottom = $fields = [];
 
     // Get the metabox IDs of ACF field groups on this page
     $filter = array( 'post_id' => $post->ID );
-    $metabox_ids = array();
-    $metabox_ids = apply_filters( 'acf/location/match_field_groups', null, $filter );
+    $metabox_ids = [];
+    $metabox_ids = apply_filters( 'acf/location/match_field_groups', $metabox_ids, $filter );
 
-    /*$acfs = apply_filters('acf/get_field_groups', array());
-    var_dump($acfs);
-    $top_acfs = $bottom_acfs = $middle_acfs = array();
-    $location_orders = get_option('componentizer_location_orders');
-    foreach ($acfs as $acf) {
-      if (in_array($acf['id'], ))
-    }
-    die();*/
-    
     // Include persistent fields and ACF field groups
     // We'll iterate through the various fields and unset them here if they exist.
     $all_fields = array_merge($metabox_ids,$this->options['persistant_fields']);
@@ -405,10 +395,10 @@ class Admin {
           // Setup the field data
           $field_title = get_the_title($field_id);
           if ($field_title === '') $field_title = ucwords($field_id);
-          $field_args = array(
+          $field_args = [
               'id' => $field_id,
               'name' => $field_title,
-            );
+            ];
           // Add it to the appropriate section
           
           if ($options[$field_id]['location'] == 'top') {
@@ -426,16 +416,16 @@ class Admin {
   
     // Sort all of the ACF fields into top, middle, and bottom.
     if (count($all_fields)) {
-      $acf_field_posts = get_posts(array('post__in' => $all_fields,'post_type' => 'acf'));
+      $acf_field_posts = get_posts(['post__in' => $all_fields,'post_type' => 'acf']);
       foreach ($acf_field_posts as $acf_field_post) {
         // If this field exists, unset it in $all_fields
-        $all_fields = array_diff($all_fields, array($acf_field_post->ID));
+        $all_fields = array_diff($all_fields, [$acf_field_post->ID]);
         $field_id = $acf_field_post->ID;
         // Setup the field data
-        $field_args = array(
+        $field_args = [
             'id' => $field_id,
             'name' => $acf_field_post->post_title,
-          );
+          ];
         // Add it to the appropriate section
         if ($options[$field_id]['location'] == 'top') {
           array_push($fields_top,$field_args);
@@ -450,7 +440,7 @@ class Admin {
     // Now, if there are any remaining fields, sort them into the correct buckets
     foreach ($all_fields as $all_field) {
       // Unset it in $all_fields
-      $all_fields = array_diff($all_fields, array($all_field));
+      $all_fields = array_diff($all_fields, [$all_field]);
       // Setup the field data
       $field_args = [
           'id' => $all_field,
@@ -479,11 +469,10 @@ class Admin {
     // var_dump($fields_bottom);
     
     // Return the field groupings
-    $fields = array(
+    $fields = [
       'top' => $fields_top,
       'middle' => $fields_middle,
-      'bottom' => $fields_bottom
-    );
+      'bottom' => $fields_bottom ];
     // var_dump($fields);
     return $fields;
   }
