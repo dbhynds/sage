@@ -14,4 +14,7 @@ The component path is the relative path in your theme where component template f
 ### $persistant\_fields
 These are fields that appear in the back and front end but aren't ACF field groups. WordPress' content editor is included by default, but others can be added or removed if desired.
 ### $exclude_order\_for\_post\_types
-The Component Order metabox will appear on all public post types except those specified here.  The default is nav_menu_item, revision, attachment.
+The Component Order metabox will appear on all public post types except those specified here.  The default is `nav\_menu\_item`, `revision`, and `attachment`.
+
+## Questions
+Can the fields on the page reflect the order in the sidebar?
