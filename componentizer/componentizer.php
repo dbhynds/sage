@@ -3,7 +3,7 @@
 // Require these files
 $componenents_includes = array(
   'componentizer/options.php',
-  'componentizer/admin/admin.php',
+  'componentizer/admin.php',
   'componentizer/components.php',
 );
 
