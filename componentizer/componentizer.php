@@ -1,11 +1,11 @@
 <?php
 
 // Require these files
-$componenents_includes = [
+$componenents_includes = array(
   'componentizer/options.php',
-  'componentizer/admin.php',
+  'componentizer/admin/admin.php',
   'componentizer/components.php',
-];
+);
 
 foreach ($componenents_includes as $file) {
   if (!$filepath = locate_template($file)) {
