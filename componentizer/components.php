@@ -14,7 +14,8 @@ function build($components = false, $suffixes = null) {
 
   // Get the base components and their associated field groups
   $component_fields = get_option( 'componentizer_fields' );
-  $visible_on_archive = array('content');
+  $location_orders = get_option('componentizer_location_orders');
+  $visible_on_archive = get_option('componentizer_visible_on_archive');
   // var_dump($component_fields);
 
   // If $components are specifically specified, use the posts' custom order.
@@ -22,10 +23,32 @@ function build($components = false, $suffixes = null) {
     $components = array();
     $component_ids = get_post_meta( $post->ID, '_field_order', true );
     // Set the base components to load as determined by the $component_ids
-    if ($component_ids) foreach ($component_ids as $component_id) {
-      if (array_key_exists($component_id,$component_fields)) {
-        if (is_singular() || in_array($component_id,$visible_on_archive)) {
-          array_push($components, $component_fields[$component_id]['template']);
+    if ($component_ids) {
+      $top_components = $sortable_components = $bottom_components = array();
+
+      foreach ($location_orders['top'] as $value) {
+        $component = array_search($value, $component_ids);
+        if ($component !== false) {
+          array_push($top_components, $value);
+          unset($component_ids[$component]);
+        }
+        unset($component);
+      }
+      foreach ($location_orders['bottom'] as $value) {
+        $component = array_search($value, $component_ids);
+        if ($component !== false) {
+          array_push($bottom_components, $value);
+          unset($component_ids[$component]);
+        }
+        unset($component);
+      }
+      $ordered_component_ids = array_merge($top_components,$component_ids,$bottom_components);
+
+      foreach ($ordered_component_ids as $component_id) {
+        if (array_key_exists($component_id,$component_fields)) {
+          if (is_singular() || in_array($component_id,$visible_on_archive)) {
+            array_push($components, $component_fields[$component_id]['template']);
+          }
         }
       }
     }

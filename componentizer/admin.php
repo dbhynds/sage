@@ -12,11 +12,12 @@ class Admin {
   // Options that will be loaded via config
   var $options = array();
   var $component_templates = array();
+  var $location_orders = array();
 
   function __construct() {
     // Load up options
     $this->options = Options\get_options();
-    $location_orders = get_option('componentizer_location_orders');
+    $this->location_orders = get_option('componentizer_location_orders');
     // Enqueue admin scripts and styles
     add_action( 'admin_enqueue_scripts', array($this,'enqueue_scripts') );
     // Make sure ACF is enabled
@@ -25,13 +26,14 @@ class Admin {
     add_action( 'admin_menu', array($this,'add_menu_page'), 20 );
     // Register Settings
     add_action( 'admin_init', array($this,'register_settings') );
+
     // Add metaboxes to the appropriate post types
     $post_types = get_post_types();
     $post_types = array_diff($post_types, $this->options['exclude_order_for_post_types']);
     foreach ($post_types as $post_type) {
       add_action( 'add_meta_boxes_'.$post_type, array($this,'add_component_order_box') );
-      add_action( 'save_post', array($this,'component_order_save_meta_box_data') );
     }
+    add_action( 'save_post', array($this,'component_order_save_meta_box_data') );
 
   }
 
@@ -73,6 +75,13 @@ class Admin {
       'componentizer_location_orders',
       __( 'Location Orders', 'componentizer' ),
       array($this,'assign_location_orders'),
+      'componentizerSettings'
+    );
+    register_setting( 'componentizerSettings', 'componentizer_visible_on_archive' );
+    add_settings_section(
+      'componentizer_visible_on_archive',
+      __( 'Visible on Archive Pages', 'componentizer' ),
+      array($this,'assign_visible_on_archive'),
       'componentizerSettings'
     );
   }
@@ -210,8 +219,12 @@ class Admin {
     submit_button();
   }
   function assign_location_orders() {
-    $top_fields = (array_key_exists('top', $location_orders)) ? $location_orders['top'] : [];
-    $bottom_fields = (array_key_exists('bottom', $location_orders)) ? $location_orders['bottom'] : [];
+    if (is_array($this->location_orders)) {
+      $top_fields = (array_key_exists('top', $this->location_orders)) ? $this->location_orders['top'] : array();
+      $bottom_fields = (array_key_exists('bottom', $this->location_orders)) ? $this->location_orders['bottom'] : array();
+    } else {
+      $top_fields = $bottom_fields = array();
+    }
     $fields = get_option( 'componentizer_fields' );
     $new_bottom_fields = $new_top_fields = array();
     foreach ($fields as $field_id => $field) {
@@ -267,6 +280,43 @@ class Admin {
     submit_button();
     
   }
+
+  function assign_visible_on_archive() {
+    $options = get_option( 'componentizer_visible_on_archive' );
+    if ($options === false) $options = array();
+    // var_dump($options);
+    // List all ACF Field Groups and their associated base components
+    $acf_fields = get_posts([
+      'post_type' => 'acf',
+      'posts_per_page' => -1,
+      'order' => 'ASC',
+      'orderby' => 'title',
+      ]);
+    if ($acf_fields && count($acf_fields)) {
+      foreach ($acf_fields as $acf_field) {
+        $checked = (in_array($acf_field->ID, $options)) ? 'checked' : null;
+        // var_dump($acf_field);
+        echo '<label for="'.$acf_field->ID.'">';
+          echo '<input type="checkbox" id="'.$acf_field->ID.'" name="componentizer_visible_on_archive[]" '.$checked.' value="'.$acf_field->ID.'">';
+          echo $acf_field->post_title;
+        echo '</label> ';
+      }
+    }
+    $persistant_fields = $this->options['persistant_fields'];
+    if ($persistant_fields && count($persistant_fields)) {
+      foreach ($persistant_fields as $persistant_field) {
+        // var_dump($persistant_field);
+        $checked = (in_array($persistant_field, $options)) ? 'checked' : null;
+        echo '<label for="'.$persistant_field.'">';
+          echo '<input type="checkbox" id="'.$persistant_field.'" name="componentizer_visible_on_archive[]" '.$checked.' value="'.$persistant_field.'">';
+          echo ucwords($persistant_field);
+        echo '</label> ';
+      }
+    }
+    submit_button();
+  }
+
+
   function assign_components_to_templates() {
     ?>
     <div id="componentizer-settings" class="wrap">
@@ -375,15 +425,6 @@ class Admin {
     $filter = array( 'post_id' => $post->ID );
     $metabox_ids = array();
     $metabox_ids = apply_filters( 'acf/location/match_field_groups', null, $filter );
-
-    /*$acfs = apply_filters('acf/get_field_groups', array());
-    var_dump($acfs);
-    $top_acfs = $bottom_acfs = $middle_acfs = array();
-    $location_orders = get_option('componentizer_location_orders');
-    foreach ($acfs as $acf) {
-      if (in_array($acf['id'], ))
-    }
-    die();*/
     
     // Include persistent fields and ACF field groups
     // We'll iterate through the various fields and unset them here if they exist.
