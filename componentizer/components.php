@@ -16,7 +16,6 @@ function build($components = false, $suffixes = null) {
   $component_fields = get_option( 'componentizer_fields' );
   $location_orders = get_option('componentizer_location_orders');
   $visible_on_archive = get_option('componentizer_visible_on_archive');
-  // var_dump($component_fields);
 
   // If $components are specifically specified, use the posts' custom order.
   if ($components === false) {
@@ -56,7 +55,6 @@ function build($components = false, $suffixes = null) {
   
   // Get the list of suffixes to try and load
   $suffixes = get_suffixes($suffixes);
-  // var_dump($suffixes);
   
   // Locate the approriate component files and load them
   if ($components) foreach ($components as $component) {
@@ -65,7 +63,6 @@ function build($components = false, $suffixes = null) {
       array_push($templates, Options\COMPONENT_PATH.'/'.$component.'-'.$suffix.'.php');
     }
     $file = locate_template($templates,false,false);
-    // var_dump($file);
     include($file);
   }
 }
