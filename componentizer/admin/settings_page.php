@@ -10,6 +10,8 @@ if (!is_admin() && !current_user_can('edit_componentizer_options')) return;
 class SettingsPage extends ComponentizerAdmin {
 
   function __construct() {
+    // Load up options
+    $this->options = Options\get_options();
     // Add the reference page to the admin menu
     add_action( 'admin_menu', array($this,'add_menu_page'), 20 );
     // Register Settings

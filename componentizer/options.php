@@ -2,6 +2,11 @@
 
 namespace Components\Options;
 
+if (!$filepath = locate_template('componentizer/config.php')) {
+  trigger_error(sprintf(__('Error locating %s for inclusion', 'componentizer'), $file), E_USER_ERROR);
+}
+require_once $filepath;
+unset($filepath);
 define(__NAMESPACE__ . '\COMPONENT_PATH',$component_path);
 
 // Set the above configuration options to an associative array for easy retrieval later
@@ -23,6 +28,6 @@ function get_options($key = false) {
   }
 }
  function add_componentizer_role() {
-     add_role( 'edit_componentizer_options', 'Customizer Options', array( 'level_10' => true ) );
+     add_role( 'edit_componentizer_options', __('Componentizer Options','componentizer'), array( 'level_10' => true ) );
  }
  register_activation_hook( __FILE__, 'add_componentizer_role' );

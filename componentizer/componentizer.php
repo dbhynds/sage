@@ -2,7 +2,6 @@
 
 // Require these files
 $componenentizer_includes = array(
-  'componentizer/config.php',
   'componentizer/options.php',
   'componentizer/components.php',
   'componentizer/admin/admin.php',
@@ -12,7 +11,7 @@ $componenentizer_includes = array(
 
 foreach ($componenentizer_includes as $file) {
   if (!$filepath = locate_template($file)) {
-    trigger_error(sprintf(__('Error locating %s for inclusion', 'components'), $file), E_USER_ERROR);
+    trigger_error(sprintf(__('Error locating %s for inclusion', 'componentizer'), $file), E_USER_ERROR);
   }
 
   require_once $filepath;
