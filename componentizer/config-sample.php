@@ -14,4 +14,3 @@ $persistant_fields = array('content');
 
 // Array of post types that should not have the Component Order metabox
 $exclude_order_for_post_types = array('nav_menu_item', 'revision', 'attachment');
-

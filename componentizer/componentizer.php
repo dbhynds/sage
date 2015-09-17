@@ -2,6 +2,7 @@
 
 // Require these files
 $componenentizer_includes = array(
+  'componentizer/config.php',
   'componentizer/options.php',
   'componentizer/components.php',
   'componentizer/admin/admin.php',

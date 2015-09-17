@@ -2,8 +2,6 @@
 
 namespace Components\Options;
 
-require('config.php');
-
 define(__NAMESPACE__ . '\COMPONENT_PATH',$component_path);
 
 // Set the above configuration options to an associative array for easy retrieval later
