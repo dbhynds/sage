@@ -2,8 +2,8 @@
 
 namespace Components\Admin;
 
-// Don't bother on the front end;
-if (!is_admin()) return;
+// Don't bother on the front end or non-admins
+if (!is_admin() && !current_user_can('edit_componentizer_options')) return;
 
 use Components\Options as Options;
 
@@ -292,6 +292,7 @@ class Admin {
       'order' => 'ASC',
       'orderby' => 'title',
       ]);
+    echo '<div id="visible-on-archive" class="card">';
     if ($acf_fields && count($acf_fields)) {
       foreach ($acf_fields as $acf_field) {
         $checked = (in_array($acf_field->ID, $options)) ? 'checked' : null;
@@ -313,6 +314,7 @@ class Admin {
         echo '</label> ';
       }
     }
+    echo '</div>';
     submit_button();
   }
 

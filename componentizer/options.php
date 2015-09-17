@@ -24,3 +24,7 @@ function get_options($key = false) {
     return $options;
   }
 }
+ function add_componentizer_role() {
+     add_role( 'edit_componentizer_options', 'Customizer Options', array( 'level_10' => true ) );
+ }
+ register_activation_hook( __FILE__, 'add_componentizer_role' );
